@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Chatbot</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+        }
+
+        .chat-container {
+            width: 100%;
+            max-width: 400px;
+            height: 90vh;
+            margin: 20px auto;
+            background: white;
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .header {
+            background: #667eea;
+            color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .messages {
+            flex: 1;
+            padding: 10px;
+            overflow-y: auto;
+
+            /* 🔥 Background Image */
+            background-image: url("https://i.ibb.co/7QpKsCX/chat-bg.png");
+            background-size: cover;
+            background-position: center;
+        }
+
+        .msg {
+            margin: 10px 0;
+            padding: 10px 15px;
+            border-radius: 20px;
+            max-width: 75%;
+            background: rgba(255,255,255,0.85);
+        }
+
+        .user {
+            margin-left: auto;
+            background: #667eea;
+            color: white;
+        }
+
+        .bot {
+            background: rgba(255,255,255,0.85);
+        }
+
+        .input-area {
+            display: flex;
+            padding: 10px;
+            border-top: 1px solid #ddd;
+            background: white;
+        }
+
+        input {
+            flex: 1;
+            padding: 10px;
+            border-radius: 20px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            margin-left: 10px;
+            padding: 10px;
+            border: none;
+            background: #667eea;
+            color: white;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+
+        /* 🌙 DARK MODE */
+        .dark {
+            background: #1e1e1e;
+        }
+
+        .dark .chat-container {
+            background: #2c2c2c;
+        }
+
+        .dark .messages {
+            background-image: url("https://i.ibb.co/Zm8Qk6p/dark-chat-bg.png");
+        }
+
+        .dark .bot {
+            background: #444;
+            color: white;
+        }
+
+        /* Typing */
+        .typing {
+            font-style: italic;
+            opacity: 0.7;
+        }
+    </style>
+</head>
+
+<body id="body">
+
+<div class="chat-container">
+    <div class="header">
+        <span>🎓 Assistant</span>
+        <button onclick="toggleMode()">🌙</button>
+    </div>
+
+    <div class="messages" id="chat"></div>
+
+    <div class="input-area">
+        <input type="text" id="msg" placeholder="Type message...">
+        <button onclick="sendMsg()">Send</button>
+    </div>
+</div>
+
+<script>
+function sendMsg() {
+    let input = document.getElementById("msg");
+    let message = input.value.trim();
+    if (message === "") return;
+
+    let chat = document.getElementById("chat");
+
+    // User message
+    chat.innerHTML += `<div class="msg user">${message}</div>`;
+    input.value = "";
+
+    // Typing effect
+    let typingId = "typing" + Date.now();
+    chat.innerHTML += `<div id="${typingId}" class="msg bot typing">Typing...</div>`;
+    chat.scrollTop = chat.scrollHeight;
+
+    fetch('/chat', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({message: message})
+    })
+    .then(res => res.json())
+    .then(data => {
+        document.getElementById(typingId).remove();
+        chat.innerHTML += `<div class="msg bot">${data.reply}</div>`;
+        chat.scrollTop = chat.scrollHeight;
+    });
+}
+
+// Enter key
+document.getElementById("msg").addEventListener("keypress", function(e) {
+    if (e.key === "Enter") sendMsg();
+});
+
+// Dark mode toggle
+function toggleMode() {
+    document.getElementById("body").classList.toggle("dark");
+}
+</script>
+
+</body>
+</html>
